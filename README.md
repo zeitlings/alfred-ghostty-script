@@ -1,5 +1,5 @@
 # Alfred Ghostty Integration
-AppleScript to integrate [Ghostty](https://ghostty.org/) with [Alfred](https://www.alfredapp.com/).
+AppleScript to integrate [Ghostty](https://ghostty.org/) with [Alfred](https://www.alfredapp.com/help/features/terminal/).
 
 ## Usage
 
