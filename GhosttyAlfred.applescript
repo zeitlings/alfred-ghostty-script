@@ -1,5 +1,6 @@
--- Latest: https://github.com/zeitlings/alfred-ghostty-script
--- v1.0.0 - 02.01.2025
+-- AlfredGhostty Script v1.2.0
+-- Latest version: https://github.com/zeitlings/alfred-ghostty-script
+-- iTerm version: https://github.com/vitorgalvao/custom-alfred-iterm-scripts
 
 -- tab : t | window: n | split: d
 property open_new : "t"
@@ -35,6 +36,10 @@ on handleWindow(just_activated)
 	if just_activated then
 		return
 	end if
+	-- if `open_new` is `n`, i.e. signals to open a new window then open it 
+	-- on the active desktop space rather than switching to an existing instance
+	-- Scrapped. This is currently not possible.
+	-- delay switch_delay -- we might be switching to the existing window
 	set has_windows to hasWindows()
 	set needs_window to not has_windows
 	set override_reuse to (reuse_tab and not has_windows)
@@ -53,17 +58,22 @@ on handleWindow(just_activated)
 	end tell
 end handleWindow
 
+on log_(a_prefix, a_message)
+	do shell script "echo \"[$(date +%Y%m%d-%H%M%S)]\"  '" & quoted form of a_prefix & quoted form of a_message & "' >> /tmp/alfred_ghostty/debug.log"
+end log_
+
 on send(a_command, just_activated)
 	if not just_activated then
-		delay switch_delay -- We might be switching to an existing window
+		delay switch_delay -- we might be switching to an existing window
 	end if
 	set had_windows to hasWindows()
 	handleWindow(just_activated)
 	
-	-- Only wait for session to load if:
+	-- Only wait for shell load if:
 	-- 1. We just activated Ghostty, or
-	-- 2. We created a new window/tab/split (i.e., not reusing), or
+	-- 2. We created a new window/tab/split (i.e., not reusing)
 	-- 3. There was no window to reuse (had_windows was false)
+	--if just_activated or (not reuse_tab and not had_windows) then
 	if just_activated or not reuse_tab or (reuse_tab and not had_windows) then
 		delay shell_load_delay
 	end if
@@ -71,10 +81,53 @@ on send(a_command, just_activated)
 		display dialog "Failed to verify window exists"
 		return
 	end if
+	
+	-- I've been experiencing unsolicited capitalization of commands.
+	-- The convoluted workaround below attempts to make sure the
+	--  'Open Terminal Here' Universal Action is also handled properly.
+	do shell script "mkdir -p /tmp/alfred_ghostty"
+	set cmd_file to "/tmp/alfred_ghostty/cmd.txt"
+	do shell script "echo " & quoted form of a_command & " | iconv -t utf-8 > " & cmd_file -- Write command to file with explicit UTF-8 encoding
+	
+	try
+		-- Works with editor, always fails with Alfred
+		set backup to the clipboard as text
+		delay 0.1
+	on error errorMessage as text
+		-- Ignore and sacrifice the clipboard contents
+		--log_("Error backing up clipboard: ", errorMessage)
+	end try
+	
+	-- Debug: Log the command content
+	--log_("Command passed: ", a_command)
+	--log_("File content: ", "$(cat " & cmd_file & ")")
+	
+	do shell script "cat " & cmd_file & " | tr -d '\\n' | pbcopy" -- Copy file contents to clipboard
+	delay 0.1
+	
 	tell application "System Events"
-		keystroke a_command
-		keystroke return
+		tell process "Ghostty"
+			keystroke "v" using command down
+			delay 0.1
+			keystroke return
+		end tell
 	end tell
+	
+	-- TODO: Could be improved by checking if the clipboard contains other formats such as files.
+	-- Maybe restoring them as POSIX paths or aliases could restore those again.
+	-- However, currently even plain text recovery fails when going through Alfred.
+	try
+		tell application "System Events"
+			set the clipboard to backup & (delay 0.1)
+		end tell
+		log {"Success. Backup has been restored to: ", backup as text}
+	on error errorMessage
+		-- Ignore the failed recovery
+		-- log "Failure. Unable to restore backup: " & errorMessage as text 
+		-- log_ {"Failure: ", "Unable to restore backup"} -- ignore
+	end try
+	-- do shell script "rm " & cmd_file
+	
 end send
 
 on alfred_script(query)
