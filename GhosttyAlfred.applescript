@@ -4,6 +4,8 @@
 
 -- tab : t | window: n | split: d
 property open_new : "t"
+-- yes : y | no: n
+property run_cmd : "y"
 property reuse_tab : false
 property timeout_seconds : 3
 property shell_load_delay : 1.0 -- Delay for session to load
@@ -108,8 +110,10 @@ on send(a_command, just_activated)
 	tell application "System Events"
 		tell process "Ghostty"
 			keystroke "v" using command down
-			delay 0.1
-			keystroke return
+			if run_cmd is "y"
+				delay 0.1
+				keystroke return
+			end if
 		end tell
 	end tell
 	
