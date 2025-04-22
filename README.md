@@ -14,9 +14,9 @@ AppleScript to integrate [Ghostty](https://ghostty.org/) with [Alfred](https://w
   * <kbd>t</kbd> open new tab
   * <kbd>n</kbd> open new window
   * <kbd>d</kbd> open new split
-- `run_cmd` : either <kbd>y</kbd> or <kbd>n</kbd>
-  * <kbd>y</kbd> paste and run the command in `ghostty`
-  * <kbd>n</kbd> only paste the command, do not run it
+- `run_cmd` : either `true` or `false`
+  * `true` paste and run the command
+  * `false` paste the command, do not run it
 - `reuse_tab` : either `true` or `false` 
 - `timeout_seconds`
 - `shell_load_delay`
