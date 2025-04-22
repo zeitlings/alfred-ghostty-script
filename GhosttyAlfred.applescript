@@ -1,11 +1,10 @@
--- AlfredGhostty Script v1.2.0
+-- AlfredGhostty Script v1.2.1
 -- Latest version: https://github.com/zeitlings/alfred-ghostty-script
 -- iTerm version: https://github.com/vitorgalvao/custom-alfred-iterm-scripts
 
 -- tab : t | window: n | split: d
 property open_new : "t"
--- yes : y | no: n
-property run_cmd : "y"
+property run_cmd : true
 property reuse_tab : false
 property timeout_seconds : 3
 property shell_load_delay : 1.0 -- Delay for session to load
@@ -110,7 +109,7 @@ on send(a_command, just_activated)
 	tell application "System Events"
 		tell process "Ghostty"
 			keystroke "v" using command down
-			if run_cmd is "y"
+			if run_cmd then
 				delay 0.1
 				keystroke return
 			end if
