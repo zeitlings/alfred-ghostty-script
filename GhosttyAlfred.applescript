@@ -1,8 +1,7 @@
--- AlfredGhostty Script v1.2.1
+-- AlfredGhostty Script v1.3.0
 -- Latest version: https://github.com/zeitlings/alfred-ghostty-script
--- iTerm version: https://github.com/vitorgalvao/custom-alfred-iterm-scripts
 
--- tab : t | window: n | split: d
+-- tab : t | window: n | split: d | quick terminal: qt
 property open_new : "t"
 property run_cmd : true
 property reuse_tab : false
@@ -133,14 +132,46 @@ on send(a_command, just_activated)
 	
 end send
 
-on alfred_script(query)
-	set just_activated to not isRunning()
-	summon()
-	if just_activated then
-		if not waitForWindow(timeout_seconds) then
-			display dialog "Failed to create initial window"
-			return
-		end if
+on send_quick_terminal(a_command, needs_wakeup)
+	if needs_wakeup then
+		summon()
 	end if
-	send(query, just_activated)
+	
+	do shell script "mkdir -p /tmp/alfred_ghostty"
+	set cmd_file to "/tmp/alfred_ghostty/cmd.txt"
+	do shell script "echo " & quoted form of a_command & " | iconv -t utf-8 > " & cmd_file
+	do shell script "cat " & cmd_file & " | tr -d '\\n' | pbcopy" -- Copy file contents to clipboard
+	delay 0.1
+	
+	tell application "System Events"
+		tell process "Ghostty"
+			set viewMenu to menu 1 of menu bar item "View" of menu bar 1
+			set quickTermItem to menu item "Quick Terminal" of viewMenu
+			click quickTermItem
+			--delay 0.1
+			keystroke "v" using command down
+			if run_cmd then
+				delay 0.1
+				keystroke return
+			end if
+		end tell
+	end tell
+	
+end send_quick_terminal
+
+on alfred_script(query)
+	
+	if open_new is "qt" then
+		send_quick_terminal(query, not isRunning())
+	else
+		set just_activated to not isRunning()
+		summon()
+		if just_activated then
+			if not waitForWindow(timeout_seconds) then
+				display dialog "Failed to create initial window"
+				return
+			end if
+		end if
+		send(query, just_activated)
+	end if
 end alfred_script
