@@ -10,10 +10,11 @@ AppleScript to integrate [Ghostty](https://ghostty.org/) with [Alfred](https://w
 
 ## Properties
 
-- `open_new` : either <kbd>t</kbd>, <kbd>n</kbd> or <kbd>d</kbd>
+- `open_new` : either <kbd>t</kbd>, <kbd>n</kbd>, <kbd>d</kbd> or <kbd>qt</kbd>
   * <kbd>t</kbd> open new tab
   * <kbd>n</kbd> open new window
   * <kbd>d</kbd> open new split
+  * <kbd>qt</kbd> use the [Quick Terminal](https://ghostty.org/docs/features#macos)
 - `run_cmd` : either `true` or `false`
   * `true` paste and run the command
   * `false` paste the command, do not run it
