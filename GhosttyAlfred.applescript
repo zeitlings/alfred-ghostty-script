@@ -1,5 +1,5 @@
 -- AlfredGhostty Script v1.4.0
--- Control Ghostty terminal via Alfred with enhanced error handling and clarity
+-- Latest version: https://github.com/zeitlings/alfred-ghostty-script
 
 -- Configuration constants
 property NEW_TAB : "t" -- Open new tab
